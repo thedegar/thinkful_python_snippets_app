@@ -39,7 +39,7 @@ def get(name):
     cursor.execute(command,(name,))
     result = cursor.fetchone()
     logging.debug("Snippet retrieved successfully.")
-    return result
+    return result[0]
     
 def remove(name):
     """
