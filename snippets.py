@@ -62,6 +62,21 @@ def catalog():
         return "404: No Keywords Found"
     logging.debug("Keywords retrieved successfully")
     return result
+    
+def search(string):
+    """
+    Returns a list of snippets containing a string
+    """
+    logging.info("Retrieving keywords from DB containing '{!r}'".format(string))
+    with connection, connection.cursor() as cursor:
+        cursor.execute("select message from snippets where message like '%{}%' order by keyword".format(string))
+        results = cursor.fetchall()
+    if not results:
+        # No results found
+        logging.info("No snippets found")
+        return "404: No Messages Found"
+    logging.debug("Snippets retrieved successfully")
+    return results
 
 def remove(name):
     """
@@ -70,15 +85,6 @@ def remove(name):
     """
     logging.error("FIXME: Unimplemented - remove({!r}".format(name))
     return ""
-    
-def update(name,snippet):
-    """
-    Find and update a named snippet
-    If there is no such snippet, put the snippet.
-    Return the snippet
-    """
-    logging.error("FIXME: Unimplemented - update({!r},{!r}".format(name,snippet))
-    return name, snippet
     
 def main():
     """Main function"""
@@ -101,6 +107,11 @@ def main():
     # Subparser for the catalog command
     logging.debug("Constructing catalog subparser")
     catalog_parser = subparsers.add_parser("catalog", help="Retrieve all keywords")
+    
+    # Subparser for the catalog command
+    logging.debug("Constructing search subparser")
+    search_parser = subparsers.add_parser("search", help="Retrieve all snippets containing a string")
+    search_parser.add_argument("string", help="String to search")
 
     arguments = parser.parse_args()
     
@@ -116,9 +127,20 @@ def main():
         print("Retrieved snippet: {!r}".format(snippet))
     elif command == "catalog":
         result = catalog(**arguments)
-        print("Keywords: ")
-        for i in result:
-            print(i[0])
+        if isinstance(result,str):
+            print(result)
+        else:
+            print("Keywords: ")
+            for i in result:
+                print(i[0])
+    elif command == "search":
+        results = search(**arguments)
+        if isinstance(results,str):
+            print(results)
+        else:
+            print("Snippets:")
+            for result in results:
+                print(result[0])
 
 if __name__ == "__main__":
     main()
