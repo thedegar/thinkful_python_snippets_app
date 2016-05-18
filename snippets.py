@@ -38,6 +38,10 @@ def get(name):
     command = "select message from snippets where keyword = %s"
     cursor.execute(command,(name,))
     result = cursor.fetchone()
+    if not result:
+        # No snippet was found with that name.
+        logging.info("Snippet not found")
+        return "404: Snippet Not Found"
     logging.debug("Snippet retrieved successfully.")
     return result[0]
     
